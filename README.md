@@ -1,5 +1,57 @@
 # Hackathon Frontend: One Piece — Rumbo al Grand Line
 
+## Ejecutar la implementación de CP1 y CP2
+
+Requisitos: **Node 24 LTS** y npm. Se incluye `package-lock.json` para instalaciones reproducibles.
+
+```sh
+npm ci
+cp .env.example .env
+npm run dev
+```
+
+En PowerShell, usa `Copy-Item .env.example .env` en lugar de `cp`. Abre la URL que muestra Vite
+(normalmente `http://localhost:5173`). `.env` debe definir `VITE_API_BASE_URL`; no se incluye una URL
+de respaldo en el código de la aplicación. Reinicia Vite después de modificar esta variable.
+La API pública del curso está indicada en `.env.example` y en el enunciado conservado abajo.
+
+Registra tu tripulación en `/register` o entra en `/login` con su cuenta existente. El registro inicia
+sesión automáticamente y muestra el código asignado por el servidor. `/` muestra el dashboard real;
+`/wanted` contiene filtros, búsqueda, orden y paginación de servidor. Cada cartel abre su expediente.
+La aplicación requiere conexión con la API y **no tiene un modo de datos ficticios**.
+
+```sh
+npm run lint
+npm run typecheck
+npm test
+npx playwright install chromium
+npm run test:e2e -- --workers=2
+npm run build
+npm run preview
+```
+
+Las pruebas unitarias y de navegador usan fixtures aisladas en `tests/`, sin consumir cuentas reales.
+Playwright inicia Vite automáticamente en el puerto 5173 y ejecuta Chromium en escritorio y con
+viewport/touch móvil; no equivale a probar Safari en un iPhone real. Para desplegar `dist/`, configura
+el hosting con fallback a `index.html` para las rutas de React Router.
+
+Organización: `src/auth` administra sesión y restauración; `src/lib` contiene el cliente Fetch, tipos,
+consultas URL y carga cancelable; `src/components` reúne componentes compartidos; `src/pages` contiene
+las pantallas. El token se conserva en `localStorage` para restaurar la sesión con `/auth/me`, se borra
+al salir o recibir un 401 privado, y se sincroniza entre pestañas. Las contraseñas nunca se almacenan.
+El estado del listado reside en la URL; el desplazamiento se recuerda en `sessionStorage`.
+
+Consulta [CP1_CP2_STATUS.md](./CP1_CP2_STATUS.md) para la matriz de criterios y evidencia de pruebas.
+El contrato público recuperado está en [docs/openapi.json](./docs/openapi.json).
+CP3 (inspección presencial), CP4 y CP5 siguen fuera de esta implementación.
+
+**Integrantes y entrega académica:** este repositorio no incluía nombres, códigos de estudiantes ni
+el `TEAM_CODE` oficial. Deben incorporarse los datos reales de la tripulación al README y a
+`hackathon.json` antes de la entrega; no se inventaron identidades ni se usó la cuenta de validación
+como cuenta oficial. El enunciado original completo se conserva a continuación.
+
+---
+
 > *"¡El One Piece existe!"* — Edward Newgate
 
 ## Descripción General
