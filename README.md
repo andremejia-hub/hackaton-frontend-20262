@@ -46,7 +46,6 @@ las pantallas. El token se conserva en `localStorage` para restaurar la sesión 
 al salir o recibir un 401 privado, y se sincroniza entre pestañas. Las contraseñas nunca se almacenan.
 El estado del listado reside en la URL; el desplazamiento se recuerda en `sessionStorage`.
 
-Consulta [CP1_CP2_STATUS.md](./CP1_CP2_STATUS.md) para la matriz de criterios y evidencia de pruebas.
 El contrato público recuperado está en [docs/openapi.json](./docs/openapi.json).
 CP3 (inspección presencial), CP4 y CP5 siguen fuera de esta implementación.
 
