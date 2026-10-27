@@ -6,6 +6,10 @@ import { AuthPage } from './pages/AuthPage'
 import { Dashboard } from './pages/Dashboard'
 import { WantedList } from './pages/WantedList'
 import { WantedDetail } from './pages/WantedDetail'
+import { NewsFeed } from './pages/NewsFeed'
+import { NewsDetail } from './pages/NewsDetail'
+import { SagaList } from './pages/SagaList'
+import { SagaStoryPage } from './pages/SagaStoryPage'
 
 function PrivateRoute() {
   const { session } = useAuth()
@@ -24,6 +28,11 @@ export function App() {
       <Route path="dashboard" element={<Navigate to="/" replace />} />
       <Route path="wanted" element={<WantedList />} />
       <Route path="wanted/:id" element={<WantedDetail />} />
+      <Route path="news" element={<NewsFeed />}>
+        <Route path=":id" element={<NewsDetail />} />
+      </Route>
+      <Route path="sagas" element={<SagaList />} />
+      <Route path="sagas/:id" element={<SagaStoryPage />} />
     </Route></Route>
     <Route path="*" element={<main className="not-found"><span className="eyebrow">Rumbo desconocido</span><h1>404 · Fuera del mapa</h1><p>Esta página no existe en la bitácora.</p><Link className="button" to="/">Volver al inicio</Link></main>} />
   </Routes>

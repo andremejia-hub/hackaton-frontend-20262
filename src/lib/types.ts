@@ -23,3 +23,62 @@ export interface DashboardSummary {
   crews: { total: number; mostWanted: Crew | null }; topBounties: Wanted[]; generatedAt: string
 }
 export interface LogPose { status: 'LOCKED' | 'UNLOCKED'; grandLineUnlocked: boolean; unlockedAt: string | null; message: string }
+export type NewsType = 'BOUNTY_UPDATE' | 'BATTLE' | 'MARINE_OPERATION' | 'WORLD_GOVERNMENT' | 'DISCOVERY'
+export type NewsPriority = 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL'
+export type NewsStatus = 'RUMOR' | 'CONFIRMED' | 'DEBUNKED'
+export interface RelatedWanted { id: string; name: string }
+export interface NewsItem {
+  id: string
+  type: NewsType
+  priority: NewsPriority
+  status: NewsStatus
+  title: string
+  summary: string
+  source: string
+  island: string
+  relatedWanted: RelatedWanted | null
+  publishedAt: string
+  updatedAt: string
+  verifiedAt: string | null
+}
+export interface NewsDetail extends NewsItem { body: string[] }
+export interface NewsFeed { items: NewsItem[]; nextCursor: string | null; hasMore: boolean }
+export type NewsStatusUpdate = 'CONFIRMED' | 'DEBUNKED'
+export interface NewsOutletContext { updateNews: (updated: NewsItem) => void }
+
+export interface SagaPalette {
+  background: string
+  surface: string
+  primary: string
+  accent: string
+  text: string
+}
+export interface SagaSummary {
+  id: string
+  order: number
+  title: string
+  subtitle: string
+  synopsis: string
+  stageCount: number
+  totalDistanceNm: number
+  firstIsland: string
+  lastIsland: string
+  palette: SagaPalette
+}
+export type SagaMetricKey = 'distanceNm' | 'crewMorale' | 'bountyPool' | 'marineThreat'
+export interface SagaMetric { key: SagaMetricKey; label: string; value: number; unit: string }
+export interface SagaStage {
+  id: string
+  order: number
+  slug: string
+  title: string
+  narrative: string[]
+  island: { id: string; name: string; x: number; y: number }
+  palette: SagaPalette
+  metrics: SagaMetric[]
+}
+export interface SagaStory {
+  saga: SagaSummary & { intro: string }
+  map: { width: number; height: number }
+  stages: SagaStage[]
+}
