@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useRef, useState } from 'react'
+import { useCallback, useEffect, useLayoutEffect, useRef, useState } from 'react'
 import { useSearchParams } from 'react-router-dom'
 import { request } from '../lib/api'
 import type { Crew, WantedPage } from '../lib/types'
@@ -36,10 +36,11 @@ export function WantedList() {
   const load = useCallback((signal: AbortSignal) => request<WantedPage>(`/wanted?${canonical}`, { signal }), [canonical])
   const resource = useResource(canonical, load)
   const resultsRef = useRef<HTMLDivElement>(null)
-  useEffect(() => () => {
+  // Capture before React removes the tall list DOM and the browser clamps scrollY.
+  useLayoutEffect(() => () => {
     try { sessionStorage.setItem(`wanted.window:${canonical}`, String(window.scrollY)) } catch { /* Storage may be disabled. */ }
   }, [canonical])
-  useEffect(() => {
+  useLayoutEffect(() => {
     if (!resource.data || !resultsRef.current) return
     try {
       resultsRef.current.scrollTop = Number(sessionStorage.getItem(`wanted.scroll:${canonical}`) ?? 0)

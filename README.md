@@ -31,9 +31,14 @@ npm run preview
 ```
 
 Las pruebas unitarias y de navegador usan fixtures aisladas en `tests/`, sin consumir cuentas reales.
-Playwright inicia Vite automáticamente en el puerto 5173 y ejecuta Chromium en escritorio y con
+Playwright inicia su propio Vite en el puerto 4173 con un dominio de API de pruebas y ejecuta Chromium en escritorio y con
 viewport/touch móvil; no equivale a probar Safari en un iPhone real. Para desplegar `dist/`, configura
 el hosting con fallback a `index.html` para las rutas de React Router.
+
+La auditoría actual abarca los ocho requisitos de CP1 distintos del registro y los diez de CP2.
+El registro pertenece a otro integrante: sus dos escenarios E2E preexistentes están omitidos
+deliberadamente y no forman parte del resultado de esta auditoría. Las pruebas usan respuestas
+interceptadas, no crean cuentas ni cambian credenciales o el `TEAM_CODE` oficial.
 
 Organización: `src/auth` administra sesión y restauración; `src/lib` contiene el cliente Fetch, tipos,
 consultas URL y carga cancelable; `src/components` reúne componentes compartidos; `src/pages` contiene

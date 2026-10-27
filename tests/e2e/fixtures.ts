@@ -12,11 +12,17 @@ export const summary: DashboardSummary = {
   crews: { total: 1, mostWanted: null }, topBounties: [wanted], generatedAt: '2026-10-01T00:00:00Z',
 }
 export async function signIn(page: Page) {
-  await page.addInitScript(() => localStorage.setItem('logpose.token', 'test-session'))
+  await page.addInitScript(() => {
+    // Seed once, so reload/direct navigation after logout cannot silently sign in again.
+    if (!sessionStorage.getItem('test.session.initialized')) {
+      localStorage.setItem('logpose.token', 'test-session')
+      sessionStorage.setItem('test.session.initialized', 'true')
+    }
+  })
 }
 export const test = base.extend<{ api: void }>({
-  api: [async ({ page }, use) => {
-    await page.route('**/api/v1/**', async route => {
+  api: [async ({ context }, use) => {
+    await context.route('**/api/v1/**', async route => {
       const url = new URL(route.request().url())
       const path = url.pathname.replace('/api/v1', '')
       const json = path === '/auth/me' ? session

@@ -23,9 +23,10 @@ export async function request<T>(path: string, options: RequestInit = {}, authen
     throw new Error('No se pudo conectar con la API. Revisa tu conexión y reintenta.')
   }
   if (!response.ok) {
-    const body = await response.json().catch(() => ({})) as { code?: string; message?: string; details?: { field: string; message: string }[] }
     // An old request must never log out a newly authenticated session.
+    // Invalidate on headers: a delayed error body must not keep private data visible.
     if (response.status === 401 && authenticated && sentToken === currentToken) unauthorized?.()
+    const body = await response.json().catch(() => ({})) as { code?: string; message?: string; details?: { field: string; message: string }[] }
     throw new ApiError(response.status, body.code ?? 'HTTP_ERROR', body.message ?? `Error del servidor (${response.status}).`, body.details)
   }
   return response.json() as Promise<T>

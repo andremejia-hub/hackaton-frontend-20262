@@ -24,4 +24,18 @@ describe('Protección de rumbo y recuperación', () => {
     await waitFor(() => expect(result.current.data).toBe('recuperado'))
     expect(load).toHaveBeenCalledTimes(2)
   })
+  it('ignora un error tardío de la consulta anterior y cancela al desmontar', async () => {
+    let rejectOld!: (reason: Error) => void
+    let latestSignal: AbortSignal | undefined
+    const old: (signal: AbortSignal) => Promise<string> = () => new Promise<string>((_, reject) => { rejectOld = reject })
+    const latest = (signal: AbortSignal) => { latestSignal = signal; return Promise.resolve('vigente') }
+    const { result, rerender, unmount } = renderHook(({ key, load }) => useResource(key, load), { initialProps: { key: 'old', load: old } })
+    rerender({ key: 'new', load: latest })
+    await waitFor(() => expect(result.current.data).toBe('vigente'))
+    await act(async () => { rejectOld(new Error('Error de una consulta obsoleta')) })
+    expect(result.current.error).toBeUndefined()
+    expect(result.current.data).toBe('vigente')
+    unmount()
+    expect(latestSignal?.aborted).toBe(true)
+  })
 })

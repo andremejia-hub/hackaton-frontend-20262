@@ -30,6 +30,21 @@ describe('Cliente HTTP y sesión', () => {
     await expect(request('/wanted')).rejects.toMatchObject({ status: 401, code: 'TOKEN_EXPIRED' })
     expect(logout).toHaveBeenCalledOnce()
   })
+  it('oculta la sesión al recibir los headers 401 aunque el cuerpo tarde en llegar', async () => {
+    vi.stubEnv('VITE_API_BASE_URL', 'https://contract.test')
+    const logout = vi.fn()
+    configureSession('test-token', logout)
+    let finishBody!: (value: { code: string; message: string }) => void
+    const body = new Promise<{ code: string; message: string }>(resolve => { finishBody = resolve })
+    vi.stubGlobal('fetch', vi.fn().mockResolvedValue({ ok: false, status: 401, json: () => body }))
+    const pending = request('/wanted')
+    const rejection = expect(pending).rejects.toMatchObject({ status: 401 })
+    await Promise.resolve()
+    const callsBeforeBody = logout.mock.calls.length
+    finishBody({ code: 'TOKEN_EXPIRED', message: 'Sesión vencida' })
+    await rejection
+    expect(callsBeforeBody).toBe(1)
+  })
   it('una respuesta 401 anterior no cierra una sesión nueva', async () => {
     vi.stubEnv('VITE_API_BASE_URL', 'https://contract.test')
     let resolve!: (value: Response) => void

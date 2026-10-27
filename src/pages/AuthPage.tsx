@@ -1,4 +1,4 @@
-import { useState, type FormEvent } from 'react'
+import { useEffect, useRef, useState, type FormEvent } from 'react'
 import { Link, Navigate, useLocation } from 'react-router-dom'
 import { useAuth } from '../auth/AuthContext'
 import { ApiError, request } from '../lib/api'
@@ -13,6 +13,12 @@ export function AuthPage({ register = false }: { register?: boolean }) {
   const [pending, setPending] = useState(false)
   const [errors, setErrors] = useState<Record<string, string>>({})
   const [message, setMessage] = useState('')
+  const pendingLogin = useRef<AbortController | null>(null)
+  useEffect(() => {
+    if (register) return
+    const login = pendingLogin
+    return () => { login.current?.abort() }
+  }, [register])
   if (session) return <Navigate to={from} replace />
   async function submit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault()
@@ -28,9 +34,18 @@ export function AuthPage({ register = false }: { register?: boolean }) {
     setErrors(fields); setMessage('')
     if (Object.keys(fields).length) return
     setPending(true)
+    // Only login is cancellable here; the teammate-owned registration path stays unchanged.
+    const loginController = register ? null : new AbortController()
+    if (loginController) pendingLogin.current = loginController
     try {
+      if (!register && loginController) {
+        const response = await request<LoginResponse>('/auth/login', { method: 'POST', body: JSON.stringify({ email, password }), signal: loginController.signal }, false)
+        if (!loginController.signal.aborted) authenticate(response)
+        return
+      }
       authenticate(await request<LoginResponse>(register ? '/auth/register' : '/auth/login', { method: 'POST', body: JSON.stringify(register ? { teamName, email, password } : { email, password }) }, false))
     } catch (error) {
+      if (loginController?.signal.aborted) return
       if (error instanceof ApiError) {
         const next = Object.fromEntries(error.details.map(detail => [detail.field, detail.message]))
         if (error.code === 'EMAIL_ALREADY_REGISTERED') next.email = error.message
@@ -38,7 +53,7 @@ export function AuthPage({ register = false }: { register?: boolean }) {
         setErrors(next)
       }
       setMessage(error instanceof Error ? error.message : 'No se pudo iniciar sesión.')
-    } finally { setPending(false) }
+    } finally { if (!loginController?.signal.aborted) setPending(false) }
   }
   return <main className="auth-shell"><section className="auth-intro"><span className="eyebrow">East Blue · Log Pose Console</span><div className="compass" aria-hidden="true">⌖</div><h1>Tu próximo rumbo<br />empieza aquí.</h1><p>La bitácora de la Guild de Cazarrecompensas. Consulta recompensas y sigue el rastro de las tripulaciones del Grand Line.</p></section>
     <section className="auth-panel"><span className="eyebrow">{register ? 'Nueva tripulación' : 'Bienvenido a bordo'}</span><h2>{register ? 'Registrar tripulación' : 'Iniciar sesión'}</h2><p className="muted">Una cuenta compartida por los integrantes de tu equipo.</p>

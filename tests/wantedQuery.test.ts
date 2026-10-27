@@ -5,7 +5,7 @@ describe('Contrato URL de CP2', () => {
   it('usa los defaults exactos de OpenAPI', () => {
     expect(parseWantedQuery(new URLSearchParams())).toEqual({ page: 0, size: 20, status: '', fruit: '', crewId: '', q: '', sort: 'bounty,desc' })
   })
-  it.each(['-1', 'NaN', 'Infinity', '1.5', '9007199254740992'])('normaliza página inválida %s', page => {
+  it.each(['-1', 'abc', 'NaN', 'Infinity', '1.5', '9007199254740992'])('normaliza página inválida %s', page => {
     expect(parseWantedQuery(new URLSearchParams({ page })).page).toBe(0)
   })
   it('normaliza enums, tamaños y longitudes sin enviar parámetros inválidos', () => {
